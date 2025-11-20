@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/sonner"
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <Toaster />
+    <Toaster position="bottom-center" />
     <App />
   </StrictMode>
 )

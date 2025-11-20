@@ -24,6 +24,7 @@ import { useForm } from "react-hook-form"
 import { useState } from "react"
 import { Loader2 } from "lucide-react"
 import axios from "axios"
+import { toast } from "sonner"
 
 const formSchema = z.object({
   aLegNumber: z.string().min(1, {
@@ -61,22 +62,36 @@ export default function App() {
 
   async function onSubmit(values) {
     setIsLoading(true);
+    toast.dismiss();
     try {
       const response = await axios.post('http://172.19.5.49/Caller/ClickToCall', values, {
         headers: {
           'Content-Type': 'application/json'
         }
       });
-      console.log('Response:', response.data);
+      console.log('Response:', response.data.Data.clicktocallv3.description);
+      toast.success(response.data.Data.clicktocallv3.description);
     } catch (error) {
       console.error(error);
+      if (error.response && error.response.data && error.response.data.message) {
+        toast.error('Arama başlatılamadı. Lütfen bilgilerinizi kontrol edin ve tekrar deneyin.', {
+          duration: Infinity,
+          dismissible: true
+        });
+      } else {
+        toast.error('Network Error: Sunucuya bağlanırken bir hata oluştu.', {
+          duration: Infinity,
+          dismissible: true
+        });
+      }
     } finally {
       setIsLoading(false);
     }
   }
 
   return (
-    <div className="h-screen w-full flex justify-center items-center">
+    <div className="h-screen w-full flex flex-col gap-10 justify-center items-center">
+      <h1 className=" text-xl md:text-3xl font-bold">Click to Call DEMO</h1>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 w-80">
 
@@ -99,6 +114,8 @@ export default function App() {
                         <SelectLabel>SIM Seçenekleri</SelectLabel>
                         <SelectItem value="05529629870">SIM 1 (05529629870)</SelectItem>
                         <SelectItem value="here">SIM 2 (here)</SelectItem>
+                        <SelectItem value="here2">SIM 3 (here)</SelectItem>
+                        <SelectItem value="here3">SIM 4 (here)</SelectItem>
                       </SelectGroup>
                     </SelectContent>
                   </Select>
