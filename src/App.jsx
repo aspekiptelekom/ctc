@@ -39,6 +39,11 @@ const formSchema = z.object({
   }).max(20, {
     message: "Müşteri numarası en fazla 20 karakter olabilir",
   }),
+  customId: z.string().min(1, {
+    message: "Özel ID boş olamaz",
+  }).max(50, {
+    message: "Özel ID en fazla 50 karakter olabilir",
+  }),
 })
 
 export default function App() {
@@ -50,13 +55,18 @@ export default function App() {
       aLegNumber: "",
       extensionNo: "",
       bLegNumber: "",
+      customId: Math.random().toString(36).substring(2, 15),
     },
   })
 
   async function onSubmit(values) {
     setIsLoading(true);
     try {
-      const response = await axios.post('http://172.19.5.49/Caller/ClickToCall', values);
+      const response = await axios.post('http://172.19.5.49/Caller/ClickToCall', values, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       console.log('Response:', response.data);
     } catch (error) {
       console.error(error);
@@ -78,7 +88,7 @@ export default function App() {
                 <FormLabel>SIM</FormLabel>
                 <FormControl>
                   <Select
-                    onValueChange={(value) => field.onChange(Number(value))}
+                    onValueChange={(value) => field.onChange(String(value))}
                     defaultValue={String(field.value)}
                   >
                     <SelectTrigger>
@@ -121,6 +131,19 @@ export default function App() {
                 <FormLabel>Müşteri Numarası</FormLabel>
                 <FormControl>
                   <Input placeholder="Müşteri numarasını girin" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="customId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Özel ID</FormLabel>
+                <FormControl>
+                  <Input placeholder="Özel ID girin" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
