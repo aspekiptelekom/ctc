@@ -21,15 +21,20 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useForm } from "react-hook-form"
+import { useState } from "react"
+import { Loader2 } from "lucide-react"
+import axios from "axios"
 
 const formSchema = z.object({
-  sim: z.number().min(1).max(2),
-  personnelNumber: z.string().min(1, {
+  aLegNumber: z.string().min(1, {
+    message: "Lütfen bir SIM kart seçin",
+  }).max(20),
+  extensionNo: z.string().min(1, {
     message: "Personel numarası boş olamaz",
   }).max(20, {
     message: "Personel numarası en fazla 20 karakter olabilir",
   }),
-  clientNumber: z.string().min(1, {
+  bLegNumber: z.string().min(1, {
     message: "Müşteri numarası boş olamaz",
   }).max(20, {
     message: "Müşteri numarası en fazla 20 karakter olabilir",
@@ -37,18 +42,27 @@ const formSchema = z.object({
 })
 
 export default function App() {
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      sim: 1,
-      personnelNumber: "",
-      clientNumber: "",
+      aLegNumber: "",
+      extensionNo: "",
+      bLegNumber: "",
     },
   })
 
-  function onSubmit(values) {
-    console.log(values)
+  async function onSubmit(values) {
+    setIsLoading(true);
+    try {
+      const response = await axios.post('http://172.19.5.49/Caller/ClickToCall', values);
+      console.log('Response:', response.data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -58,7 +72,7 @@ export default function App() {
 
           <FormField
             control={form.control}
-            name="sim"
+            name="aLegNumber"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>SIM</FormLabel>
@@ -73,8 +87,8 @@ export default function App() {
                     <SelectContent>
                       <SelectGroup>
                         <SelectLabel>SIM Seçenekleri</SelectLabel>
-                        <SelectItem value="1">SIM 1 ()</SelectItem>
-                        <SelectItem value="2">SIM 2 ()</SelectItem>
+                        <SelectItem value="05529629870">SIM 1 (05529629870)</SelectItem>
+                        <SelectItem value="here">SIM 2 (here)</SelectItem>
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -87,7 +101,7 @@ export default function App() {
 
           <FormField
             control={form.control}
-            name="personnelNumber"
+            name="extensionNo"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Personel Numarası</FormLabel>
@@ -101,7 +115,7 @@ export default function App() {
 
           <FormField
             control={form.control}
-            name="clientNumber"
+            name="bLegNumber"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Müşteri Numarası</FormLabel>
@@ -113,7 +127,7 @@ export default function App() {
             )}
           />
 
-          <Button type="submit" className=" w-full">Ara</Button>
+          <Button disabled={isLoading} type="submit" className=" w-full">{isLoading ? <Loader2 className="animate-spin" /> : "Ara"}</Button>
         </form>
       </Form>
     </div>
